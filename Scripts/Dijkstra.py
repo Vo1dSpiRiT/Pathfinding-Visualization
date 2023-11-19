@@ -22,7 +22,7 @@ def Dijkstra(grid):
         
         unvisitedNeighbors = getUnvisitedNeighbors(grid, closestNode)
         for neighbor in unvisitedNeighbors:
-            neighbor.distance = closestNode.distance + 1
+            neighbor.distance = closestNode.distance + (neighbor.weight+1)
             neighbor.previousNode = closestNode
         closestNode.isVisited = True
         

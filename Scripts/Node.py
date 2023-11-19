@@ -5,9 +5,10 @@ class Node():
               "visited": [(255, 50, 50), (200, 55, 0)],
               "start": [(100, 0, 150), (180, 0, 190)],
               "end": [(255, 150, 0), (255, 100, 0)],
-              "wall": [(70, 70, 70), (50, 50, 50)],
+              "wall": [(107, 124, 125), (50, 50, 50)],
               "path": [(120, 220, 0), (0, 153, 76)],
               "selected": [(255, 255, 0), (220, 200, 50)]}
+    
     def __init__(self, x, y, dimensions):
         self.position = pygame.Vector2(x, y)
         self.dimensions = dimensions
@@ -23,6 +24,7 @@ class Node():
         self.previousNode = None
         self.color = Node.colors["unvisited"]
         self.updateColor()
+        self.weightFont = pygame.font.SysFont('sans-serif', int(self.dimensions[1]))
         self.rect = pygame.Rect(int(self.position.x*self.dimensions[0]),
                            int(self.position.y*self.dimensions[1]),
                            self.dimensions[0], self.dimensions[1])
@@ -33,6 +35,11 @@ class Node():
     def draw(self, surface):
         if self.color:
             pygame.draw.rect(surface, self.color[0], self.rect)
+        if self.weight:
+            weightText = self.weightFont.render(str(self.weight), 1, (150, 150, 150))
+            textPosition = (self.position.x*self.dimensions[0]+self.dimensions[0]/4,
+                            self.position.y*self.dimensions[1]+self.dimensions[1]/4)
+            surface.blit(weightText, textPosition)
         
     def updateColor(self):
         if self.isStart:

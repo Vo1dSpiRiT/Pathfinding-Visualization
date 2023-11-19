@@ -9,7 +9,7 @@ resolution = Vector2(1000, 700)
 WIN = pygame.display.set_mode((int(resolution.x), int(resolution.y)))
 pygame.display.set_caption("Pathfinding Visualizer")
 
-FPS_Font = pygame.font.SysFont('comicsans', 40)
+FPS_Font = pygame.font.SysFont('sans-serif', 40)
 TARGET_FPS = 60
 
 def draw_window(TimePerFrame):
@@ -49,7 +49,7 @@ def main():
     running = True
     algorithmComplete = False
     blocks = {"S": "start", "E": "end", "W": "wall", "G": "weight"}
-    weight = 10
+    weight = 5
     mouseHold = False
     selectedBlock = "end"
     currentAnimatedNode = None
@@ -74,12 +74,21 @@ def main():
                         grid.changeStartNode(selectedNode)
                     if selectedBlock == "end":
                         grid.changeEndNode(selectedNode)
+                        
                     if selectedBlock == "wall":
                         if not mouseHold:
-                            wallState = selectedNode.isWall
-                        selectedNode.isWall = not wallState
+                            selectedState = not selectedNode.isWall
+                        if selectedNode.weight and selectedState:
+                            selectedNode.weight = 0
+                        selectedNode.isWall = selectedState
+                        
                     if selectedBlock == "weight":
-                        if selectedNode.weight != weight:
+                        if not mouseHold:
+                            if selectedNode.weight != weight:
+                                selectedState = True
+                            else:
+                                selectedState = False
+                        if selectedState and not selectedNode.isWall:
                             selectedNode.weight = weight
                         else:
                             selectedNode.weight = 0
