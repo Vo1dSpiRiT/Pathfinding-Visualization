@@ -8,9 +8,8 @@ def Dijkstra(grid):
     startNode.distance = 0
     unvisitedNodes = grid.nodes.flatten()
     while len(unvisitedNodes):
-        unvisitedNodes = sortByDistance(unvisitedNodes)
-        closestNode = unvisitedNodes[0]
-        unvisitedNodes = np.delete(unvisitedNodes, 0)
+        closestNode, index = getClosestNode(unvisitedNodes)
+        unvisitedNodes = np.delete(unvisitedNodes, index)
         if closestNode.distance == float('inf'):
             return visitedNodesInOrder, []
         visitedNodesInOrder = np.append(visitedNodesInOrder, closestNode)
@@ -34,12 +33,16 @@ def getShortestPath(shortestPath):
         shortestPath.append(currentNode.previousNode)
         return getShortestPath(shortestPath)
     return shortestPath
-    
-def sortByDistance(unvisitedNodes):
-    unvisitedNodes = unvisitedNodes.tolist()
-    unvisitedNodes.sort(key=lambda x: x.distance)
-    return np.array(unvisitedNodes)
 
+def getClosestNode(unvisitedNodes):
+    closestNode = unvisitedNodes[0]
+    index = 0
+    for i, node in enumerate(unvisitedNodes):
+        if node.distance < closestNode.distance:
+            closestNode = node
+            index = i
+    return closestNode, index
+        
 def getUnvisitedNeighbors(grid, currentNode):
     neighbors = []
     x, y = int(currentNode.position.x), int(currentNode.position.y)
