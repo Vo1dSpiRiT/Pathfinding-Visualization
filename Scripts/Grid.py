@@ -33,6 +33,8 @@ class Grid():
     
     def reset(self):
         self.nodes = self.getNodes()
+        self.startNode = self.getStartNode()
+        self.endNode = self.getEndNode()
         
     def getPressedNode(self, mousePosition):
         row = int(mousePosition[0] // self.nodeDimensions[0])

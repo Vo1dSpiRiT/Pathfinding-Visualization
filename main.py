@@ -33,7 +33,7 @@ nodeDimensions = [resolution[0]/gridDimensions[0], resolution[1]/gridDimensions[
 grid = Grid(gridDimensions[0], gridDimensions[1], nodeDimensions, Vector2(0,0), Vector2(4,4))
     
 def drawlines(surface):
-    lineColor = (200, 200, 200)
+    lineColor = (20, 20, 145)
     for i in range(gridDimensions[1]+1):
         pygame.draw.line(surface, lineColor,
                         (0, int(i * nodeDimensions[1])),
@@ -63,6 +63,9 @@ def main():
             mousePosition = pygame.mouse.get_pos()
             mousePressed = pygame.mouse.get_pressed()
             if mousePressed[0]:
+                if algorithmComplete:
+                    algorithmComplete = False
+                    grid.reset()
                 selectedNode = grid.getPressedNode(mousePosition)
                 if not (selectedNode.isEnd or selectedNode.isStart):
                     if selectedBlock == "start":
@@ -78,8 +81,6 @@ def main():
                             selectedNode.weight = 0
                     
             if event.type == pygame.KEYDOWN:
-                if algorithmComplete:
-                    grid.reset()
                 keysPressed = pygame.key.get_pressed()
                 if keysPressed[pygame.K_s]:
                     selectedBlock = blocks["S"]
@@ -90,13 +91,15 @@ def main():
                 if keysPressed[pygame.K_g]:
                     selectedBlock = blocks["G"]
                 if keysPressed[pygame.K_r]:
-                    grid.reset()
                     algorithmComplete = False
+                    grid.reset()
                 if keysPressed[pygame.K_SPACE]:
                     if not algorithmComplete:
                         visitedNodesInOrder, shortestPath = Dijkstra(grid)
-                        print(len(shortestPath))
                         algorithmComplete = True
+                    else:
+                        algorithmComplete = False
+                        grid.reset()
                 
         if algorithmComplete:
             if len(visitedNodesInOrder) or len(shortestPath):
