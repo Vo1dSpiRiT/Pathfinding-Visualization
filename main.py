@@ -50,6 +50,7 @@ def main():
     algorithmComplete = False
     blocks = {"S": "start", "E": "end", "W": "wall", "G": "weight"}
     weight = 10
+    mouseHold = False
     selectedBlock = "end"
     currentAnimatedNode = None
     while running:
@@ -66,6 +67,7 @@ def main():
                 if algorithmComplete:
                     algorithmComplete = False
                     grid.reset()
+                    
                 selectedNode = grid.getPressedNode(mousePosition)
                 if not (selectedNode.isEnd or selectedNode.isStart):
                     if selectedBlock == "start":
@@ -73,12 +75,17 @@ def main():
                     if selectedBlock == "end":
                         grid.changeEndNode(selectedNode)
                     if selectedBlock == "wall":
-                        selectedNode.isWall = not selectedNode.isWall
+                        if not mouseHold:
+                            wallState = selectedNode.isWall
+                        selectedNode.isWall = not wallState
                     if selectedBlock == "weight":
                         if selectedNode.weight != weight:
                             selectedNode.weight = weight
                         else:
                             selectedNode.weight = 0
+                mouseHold = True
+            else:
+                mouseHold = False
                     
             if event.type == pygame.KEYDOWN:
                 keysPressed = pygame.key.get_pressed()
