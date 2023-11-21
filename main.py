@@ -9,27 +9,39 @@ resolution = Vector2(1500, 900)
 WIN = pygame.display.set_mode((int(resolution.x), int(resolution.y)))
 pygame.display.set_caption("Pathfinding Visualizer")
 
-FPS_Font = pygame.font.SysFont('sans-serif', 40)
+TextFont = pygame.font.SysFont('sans-serif', 40)
 
-def draw_window(TimePerFrame):
-    WIN.fill((20, 80, 145))
-    grid.draw(WIN)
-    drawlines(WIN)
-    drawFPS(TimePerFrame)
-    pygame.display.update()
-    
-    
 def getFPS(TimePerFrame):
     return round(1 / TimePerFrame)
 
 def drawFPS(TimePerFrame):
     CurrentFPS = getFPS(TimePerFrame)
-    FPS_Text = FPS_Font.render("FPS: "  + str(CurrentFPS), 1, (255, 255, 255))
+    FPS_Text = TextFont.render("FPS: "  + str(CurrentFPS), 1, (255, 255, 255))
     WIN.blit(FPS_Text, (int(resolution.x) - 150, 10))
     
-gridDimensions = [150, 90] #rows, columns
+def drawSpeed(speed):
+    speedText = TextFont.render("Speed: "  + str(speed), 1, (255, 255, 255))
+    WIN.blit(speedText, (10, int(resolution.y) - 40))
+    
+def drawNodeType(nodeType):
+    nodeTypeText = TextFont.render("Selected Node: "  + str(nodeType), 1, (255, 255, 255))
+    WIN.blit(nodeTypeText, (10, 10))
+    
+def drawLoading():
+    loadingTextFont = pygame.font.SysFont('sans-serif', 60)
+    loadingText = loadingTextFont.render("Loading. . .", 1, (255, 255, 255))
+    WIN.blit(loadingText, (resolution[0]/2-100, resolution[1]/2-20))
+    
+def displayLoading():
+    drawLoading()
+    pygame.display.update()
+    
+displayLoading()
+gridDimensions = [150, 90] #columns, rows
 nodeDimensions = [resolution[0]/gridDimensions[0], resolution[1]/gridDimensions[1]]
-grid = Grid(gridDimensions[0], gridDimensions[1], nodeDimensions, Vector2(0,0), Vector2(4,4))
+defaultStartPosition = Vector2(round(gridDimensions[0]/4), round(gridDimensions[1]/2))
+defaultEndPosition = Vector2(round(gridDimensions[0]*3/4), round(gridDimensions[1]/2))
+grid = Grid(gridDimensions[0], gridDimensions[1], nodeDimensions, defaultStartPosition, defaultEndPosition)
     
 def drawlines(surface):
     lineColor = (20, 70, 145)
@@ -41,8 +53,20 @@ def drawlines(surface):
         pygame.draw.line(surface, lineColor,
                         (int(i * nodeDimensions[0]), 0),
                         (int(i * nodeDimensions[0]),int(gridDimensions[1] * nodeDimensions[1])))
-    
 
+def draw_window(TimePerFrame, speed, nodeType):
+    WIN.fill((20, 80, 145))
+    grid.draw(WIN)
+    drawlines(WIN)
+    drawFPS(TimePerFrame)
+    drawSpeed(speed)
+    drawNodeType(nodeType)
+    pygame.display.update()
+    
+def reset():
+    displayLoading()
+    grid.reset()
+    
 def main():
     clock = pygame.time.Clock()
     running = True
@@ -74,16 +98,17 @@ def main():
                     selectedBlock = blocks["G"]
                 if keysPressed[pygame.K_r]:
                     algorithmComplete = False
-                    grid.reset()
+                    reset()
                 if keysPressed[pygame.K_SPACE]:
                     if not algorithmComplete:
+                        displayLoading()
                         visitedNodesInOrder, shortestPath = Dijkstra(grid)
                         algorithmComplete = True
                         timePassed = 0
                         dt = 0
                     else:
                         algorithmComplete = False
-                        grid.reset()
+                        reset()
         
         if keysPressed[pygame.K_UP]:
             speed += 1
@@ -96,7 +121,7 @@ def main():
         if mousePressed[0]:
             if algorithmComplete:
                 algorithmComplete = False
-                grid.reset()
+                reset()
                     
             selectedNode = grid.getPressedNode(mousePosition)
             if not (selectedNode.isEnd or selectedNode.isStart):
@@ -148,7 +173,7 @@ def main():
                         currentAnimatedNode.isSelected = True
                 
                     
-        draw_window(TimePerFrame)
+        draw_window(TimePerFrame, speed, selectedBlock)
 
     pygame.quit()
     
