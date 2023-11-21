@@ -12,9 +12,9 @@ def Dijkstra(grid):
         unvisitedNodes = np.delete(unvisitedNodes, index)
         if closestNode.distance == float('inf'):
             return visitedNodesInOrder, []
-        visitedNodesInOrder = np.append(visitedNodesInOrder, closestNode)
         if closestNode.isWall:
             continue
+        visitedNodesInOrder = np.append(visitedNodesInOrder, closestNode)
         if closestNode.isEnd:
             path = [endNode]
             return visitedNodesInOrder, getShortestPath(path)
@@ -25,8 +25,6 @@ def Dijkstra(grid):
             neighbor.previousNode = closestNode
         closestNode.isVisited = True
         
-
-    
 def getShortestPath(shortestPath):
     currentNode = shortestPath[-1]
     if currentNode.previousNode:
@@ -54,5 +52,5 @@ def getUnvisitedNeighbors(grid, currentNode):
         neighbors.append(grid[x, y-1])
     if y < grid.cols-1:
         neighbors.append(grid[x, y+1])
-    return [neighbor for neighbor in neighbors if not neighbor.isVisited]
+    return [neighbor for neighbor in neighbors if not (neighbor.isVisited or neighbor.previousNode)]
     
