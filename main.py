@@ -3,7 +3,8 @@ from pygame.math import Vector2
 pygame.font.init()
 import numpy as np
 from Scripts.Grid import Grid
-from Scripts.Dijkstra import Dijkstra
+from Scripts.Algorithms.Dijkstra import Dijkstra
+from Scripts.Algorithms.Astar import Astar
 
 resolution = Vector2(1500, 900)
 WIN = pygame.display.set_mode((int(resolution.x), int(resolution.y)))
@@ -26,6 +27,15 @@ def drawSpeed(speed):
 def drawNodeType(nodeType):
     nodeTypeText = TextFont.render("Selected Node: "  + str(nodeType), 1, (255, 255, 255))
     WIN.blit(nodeTypeText, (10, 10))
+    
+def drawAlgorithm(algorithm):
+    if algorithm == Dijkstra:
+        name = "Dijkstra"
+    elif algorithm == Astar:
+        name = "A*"
+    text = "Search Algorithm: "  + name
+    speedText = TextFont.render(text, 1, (255, 255, 255))
+    WIN.blit(speedText, (int(resolution.x) - len(text)*15, int(resolution.y) - 40))
     
 def drawLoading():
     loadingTextFont = pygame.font.SysFont('sans-serif', 60)
@@ -54,13 +64,14 @@ def drawlines(surface):
                         (int(i * nodeDimensions[0]), 0),
                         (int(i * nodeDimensions[0]),int(gridDimensions[1] * nodeDimensions[1])))
 
-def draw_window(TimePerFrame, speed, nodeType):
+def draw_window(TimePerFrame, speed, nodeType, algorithm):
     WIN.fill((20, 80, 145))
     grid.draw(WIN)
     drawlines(WIN)
     drawFPS(TimePerFrame)
     drawSpeed(speed)
     drawNodeType(nodeType)
+    drawAlgorithm(algorithm)
     pygame.display.update()
     
 def reset():
@@ -78,6 +89,9 @@ def main():
     timePassed = 0
     speed = 1
     currentAnimatedNode = None
+    selectedAlgorithm = Dijkstra
+    visitedNodesInOrder = np.empty(0)
+    shortestPath = []
     while running:
         TimePerFrame  = clock.tick(300) * .001
         dt = TimePerFrame
@@ -96,16 +110,20 @@ def main():
                     selectedBlock = blocks["W"]
                 if keysPressed[pygame.K_g]:
                     selectedBlock = blocks["G"]
+                if keysPressed[pygame.K_F1]:
+                    selectedAlgorithm = Dijkstra
+                if keysPressed[pygame.K_F2]:
+                    selectedAlgorithm = Astar
                 if keysPressed[pygame.K_r]:
                     algorithmComplete = False
                     reset()
-                if keysPressed[pygame.K_SPACE]:
+                if keysPressed[pygame.K_RETURN]:
                     if not algorithmComplete:
                         displayLoading()
-                        visitedNodesInOrder, shortestPath = Dijkstra(grid)
+                        visitedNodesInOrder, shortestPath = selectedAlgorithm(grid)
                         algorithmComplete = True
+                        speed = 1
                         timePassed = 0
-                        dt = 0
                     else:
                         algorithmComplete = False
                         reset()
@@ -153,27 +171,25 @@ def main():
             mouseHold = False
                 
         
-        if algorithmComplete:
+        if algorithmComplete and (len(visitedNodesInOrder) or len(shortestPath)):
             timePassed += dt
             ticks = int(timePassed // (1/speed))
+            timePassed %= (1/speed)
             if ticks:
-                timePassed %= (1/speed)
                 for tick in range(ticks):
-                    if len(visitedNodesInOrder) or len(shortestPath):
-                        if len(visitedNodesInOrder):
-                            if currentAnimatedNode:
-                                currentAnimatedNode.isSelected = False
-                            currentAnimatedNode = visitedNodesInOrder[0]
-                            visitedNodesInOrder = np.delete(visitedNodesInOrder, 0)
-                            currentAnimatedNode.animated = True
-                        elif len(shortestPath):
-                            currentAnimatedNode = shortestPath[-1]
-                            currentAnimatedNode.isPath = True
-                            shortestPath = np.delete(shortestPath, -1)
-                        currentAnimatedNode.isSelected = True
-                
+                    if len(visitedNodesInOrder):
+                        if currentAnimatedNode:
+                            currentAnimatedNode.isSelected = False
+                        currentAnimatedNode = visitedNodesInOrder[0]
+                        visitedNodesInOrder = np.delete(visitedNodesInOrder, 0)
+                        currentAnimatedNode.animated = True
+                    elif len(shortestPath):
+                        currentAnimatedNode = shortestPath[-1]
+                        currentAnimatedNode.isPath = True
+                        shortestPath = np.delete(shortestPath, -1)
+                    currentAnimatedNode.isSelected = True
                     
-        draw_window(TimePerFrame, speed, selectedBlock)
+        draw_window(TimePerFrame, speed, selectedBlock, selectedAlgorithm)
 
     pygame.quit()
     
